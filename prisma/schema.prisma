@@ -1,0 +1,215 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  CHEF
+  BRANCH_MANAGER
+  HQ_MANAGER
+  ADMIN
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  READY
+  COMPLETED
+  REJECTED
+  CANCELLED
+}
+
+enum OrderStatus {
+  PENDING
+
+  CONFIRMED
+
+  PREPARING
+
+  READY
+
+  COMPLETED
+
+  CANCELLED
+}
+
+model User {
+  id       String @id @default(cuid())
+  name     String
+  email    String @unique
+  password String
+  role     Role
+
+  branchId String?
+  branch   Branch? @relation("BranchUsers", fields: [branchId], references: [id])
+
+  managedBranch Branch? @relation("BranchManager")
+
+  reservations    Reservation[]
+  chefShifts      ChefShift[]
+  customerProfile Customer?
+  chefProfile     Chef?
+  managerProfile  BranchManager?
+  hqProfile       HqManager?
+  adminProfile    Admin?
+
+  createdAt DateTime @default(now())
+  orders    Order[]
+}
+
+model Customer {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model Chef {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model BranchManager {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model HqManager {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model Admin {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model Branch {
+  id          String @id @default(cuid())
+  name        String
+  location    String
+  phone       String
+  revenue     Float  @default(0)
+  capacity    Int    @default(30)
+  openingHour Int    @default(10)
+
+  closingHour Int @default(23)
+
+  users User[] @relation("BranchUsers")
+
+  managerId String? @unique
+  manager   User?   @relation("BranchManager", fields: [managerId], references: [id])
+
+  reservations Reservation[]
+
+  createdAt DateTime @default(now())
+}
+
+model Reservation {
+  id String @id @default(cuid())
+
+  customerId String
+  customer   User   @relation(fields: [customerId], references: [id])
+
+  branchId String
+  branch   Branch @relation(fields: [branchId], references: [id])
+
+  guests          Int
+  reservationTime DateTime
+
+  status ReservationStatus @default(PENDING)
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  order     Order?
+}
+
+model Order {
+  id String @id @default(cuid())
+
+  reservationId String @unique
+
+  customerId String
+
+  totalPrice Float
+
+  status OrderStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+
+  reservation Reservation @relation(fields: [reservationId], references: [id])
+
+  customer User @relation(fields: [customerId], references: [id])
+
+  orderItems OrderItem[]
+}
+
+model OrderItem {
+  id String @id @default(cuid())
+
+  orderId String
+
+  menuItemId String
+
+  quantity Int
+
+  subtotal Float
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id])
+}
+
+model MenuItem {
+  id String @id @default(cuid())
+
+  name String
+
+  description String
+
+  price Float
+
+  image String
+
+  category String
+
+  available Boolean @default(true)
+
+  createdAt DateTime @default(now())
+
+  orderItems OrderItem[]
+}
+
+model ChefShift {
+  id String @id @default(cuid())
+
+  chefId String
+
+  chef User @relation(fields: [chefId], references: [id])
+
+  startTime DateTime
+
+  endTime DateTime
+
+  createdAt DateTime @default(now())
+}

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Branch" ADD COLUMN     "closingHour" INTEGER NOT NULL DEFAULT 23,
+ADD COLUMN     "openingHour" INTEGER NOT NULL DEFAULT 10;
