@@ -151,12 +151,15 @@ export const getBranchDashboard = async (
         },
         users: {
           where: {
-            role: "CHEF"
+            role: {
+              in: ["CHEF", "BRANCH_MANAGER"]
+            }
           },
           select: {
             id: true,
             name: true,
-            email: true
+            email: true,
+            role: true
           }
         }
       }
