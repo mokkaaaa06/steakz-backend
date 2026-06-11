@@ -526,6 +526,10 @@ export const updateUser = async (
       ...validatedData
     };
 
+    if (updateData.branchId === undefined) {
+      delete updateData.branchId;
+    }
+
     if (
       validatedData.password
     ) {

@@ -21,7 +21,20 @@ export const registerSchema = z.object({
     ]),
 
   branchId:
-    z.string().optional()
+    z.preprocess((value) => {
+      if (typeof value === "string") {
+        const trimmed = value.trim();
+        return trimmed === "" ? undefined : trimmed;
+      }
+      return value;
+    }, z.string().min(1).optional())
+}).superRefine((data, ctx) => {
+  if ((data.role === "CHEF" || data.role === "BRANCH_MANAGER") && !data.branchId) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "branchId is required for CHEF and BRANCH_MANAGER"
+    });
+  }
 });
 
 export const loginSchema = z.object({
@@ -54,5 +67,18 @@ export const updateUserSchema = z.object({
     ]).optional(),
 
   branchId:
-    z.string().optional()
+    z.preprocess((value) => {
+      if (typeof value === "string") {
+        const trimmed = value.trim();
+        return trimmed === "" ? undefined : trimmed;
+      }
+      return value;
+    }, z.string().min(1).optional())
+}).superRefine((data, ctx) => {
+  if ((data.role === "CHEF" || data.role === "BRANCH_MANAGER") && !data.branchId) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "branchId is required for CHEF and BRANCH_MANAGER when role is set"
+    });
+  }
 });

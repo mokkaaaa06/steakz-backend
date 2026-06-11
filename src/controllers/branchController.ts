@@ -145,7 +145,8 @@ export const getBranchDashboard = async (
           select: {
             id: true,
             name: true,
-            email: true
+            email: true,
+            role: true
           }
         },
         users: {
@@ -221,9 +222,12 @@ export const getBranchDashboard = async (
         location: branch.location,
         capacity: branch.capacity,
         openingHour: branch.openingHour,
-        closingHour: branch.closingHour
+        closingHour: branch.closingHour,
+        manager: branch.manager,
+        branchManager: branch.manager
       },
       manager: branch.manager,
+      branchManager: branch.manager,
       chefs: branch.users,
       statistics: {
         totalReservations,
